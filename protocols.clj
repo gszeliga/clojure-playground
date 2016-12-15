@@ -29,3 +29,28 @@
 
 (update matrix 1 2 :x)
 (lookup *1 1 2)
+
+(extend-protocol Matrix
+  (Class/forName "[[D")
+  (lookup [matrix i j]
+    (aget matrix i j))
+  (update [matrix i j value]
+    (let [clone (aclone matrix)]
+      (aset clone i
+            (doto (aclone (aget clone i))
+              (aset j value)))
+      clone))
+  (rows [matrix]
+    (map vec matrix))
+  (cols [matrix]
+    (apply map vector matrix))
+  (dim [matrix]
+    (let [rs (count matrix)]
+      (if (zero? rs)
+        [0 0]
+        [rs (count (aget matrix 0))]))))
+
+
+
+
+
