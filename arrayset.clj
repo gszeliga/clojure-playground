@@ -57,19 +57,43 @@
      (and (or (instance? clojure.lang.IPersistentSet that)
               (instance? java.util.Set))
           (= (count this) (count that))
-          (every? #(contains? % this) that)))))
+          (every? #(contains? % this) that))))
+
+
+  java.util.Set
+  (isEmpty [this] (zero? size))
+  (size [this] size)
+  (toArray [this array]
+    ;'sequences' are java collections
+    (.toArray ^java.util.Collection (sequence items) array))
+  (toArray [this] (into-array (seq this)))
+  (iterator [this] (.iterator ^java.util.Collection (sequence this)))
+  (containsAll [this coll]
+    (every? #(contains? % this) coll))
+
+  clojure.lang.IFn
+  (invoke [this key] (.get this key))
+  (applyTo [this args]
+    (when (not= 1 (count args))
+      (throw (clojure.lang.ArityException. (count args) "ArraySet"))
+      (this (first args)))))
+
 
   (def ^:private empty-array-set (ArraySet. (object-array max-size) 0 -1))
 
   (defn array-set
     "Creates an array-backed set containing the given values."
     [& vals]
-    (into empty-array-set vals)
+    (into empty-array-set vals))
 
 
 
-
+;Some usage samples
 (array-set)
-
-
-
+(conj (array-set) 1)
+(apply array-set "hello")
+(get (apply array-set "hello") \w)
+(get (apply array-set "hello") \h)
+(contains? (apply array-set "hello") \h)
+(= (array-set) #{})
+((apply array-set "hello") \h)
